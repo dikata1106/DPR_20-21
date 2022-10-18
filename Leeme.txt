@@ -1,0 +1,47 @@
+cp ./controlador.py $HOME/pox/pox/misc/controlador.py
+cp ./topologia.py $HOME/mininet/custom/topologia.py
+cd $HOME
+sudo ./pox/pox.py misc.controlador
+sudo mn --custom ./mininet/custom/topologia.py --topo=mytopo --controller=remote
+
+
+'''
+Daniel Ruskov
+DPR2020 Proyecto 1
+
+Topologia regular - arbol con parametro fo (fan-out) definido internamente en este fichero
+
+Siempre tres niveles
+ - Superior - switch unico conectado a fo switches del nivel de acceso (1 unidad Ts) 
+ - Acceso - fo switches, cada uno gestionand fo hosts del nivel de hosts (fo unidades s1, s2, s3, ...)
+ - Hosts - fo hosts conectados a cada switch de acceso (fo * fo unidades hsn, donde s switch al que 
+   esta unido y n numero de host en ese switch)
+
+Direcciones IP (@IP) | direcciones MAC (#MAC) de los nodos - 10.0.s.n/16 (misma subred, no routing)
+
+DPID - string identificador asignado a cada switch. Cadena de hasta 16 digitos hexadecimales de conexion
+switch-controlador, conocido tanto por los switches como por el controlador. Mininet puede gestionarlo, y
+ademas deriva las direcciones MAC de los switches a partir de este numero.
+ - Ejemplo en Mininet - Ts = net.addSwitch('Ts', cls=OVSKernelSwitch, dpid='0000000100000099')
+Esto asegura una direccion MAC en Ts = 00-01-00-00-00-99. El 01 en el segundo byte mas significativo es 
+para evitar la direccion todo-ceros. POX puede saber, por cada conexion con un switch, el dpid 
+correspondiente exactamente que switch es. En el ejemplo, desde POX, event.dpid = 0x100000099
+
+Ejecucion - "sudo mn --custom topologia.py --topo=mytopo"
+ - Ejemplo - "sudo mn --custom $HOME/mininet/custom/topologia.py --topo=mytopo"
+'''
+
+'''
+Daniel Ruskov
+DPR2020 Proyecto 1
+
+Crear una aplicacion para POX que instale, de manera proactiva, los flujos necesarios 
+para la comunicacion completa en el arbol anterior, conociendo el parametro "fo".
+Esqueleto:
+ - Cada vez que se conecte un switch, averiguar cual es (mediante el dpid) e instalar los 
+   flujos apropiados para la comunicacion punto a punto.
+ - Reenvios usando direcciones IP y mascaras. Acceso: diferenciar "local" (mismo switch)
+   frente a "no local" (otro switch). Superior: saber por que rama enviar.
+ - ¿Que pasa con protocolos basados en difusion? En particular, ARP. De entrada, inundar.
+ - ¿Que pasa si un paquete empareja con dos flujos?
+'''
